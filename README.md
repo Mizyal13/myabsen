@@ -1,4 +1,4 @@
-````markdown
+
 # MyAbsen — Employee Attendance Management (Laravel 12)
 
 Aplikasi **manajemen absensi karyawan** berbasis **Laravel 12 (PHP 8.x)** untuk **check-in/check-out**, **pengajuan izin (sakit/cuti) dengan approval**, dan **laporan per karyawan**.
@@ -32,7 +32,7 @@ Aplikasi **manajemen absensi karyawan** berbasis **Laravel 12 (PHP 8.x)** untuk 
 ---
 
 ## Quick Start
-```bash
+
 git clone https://github.com/Mizyal13/myabsen.git
 cd myabsen
 composer install
@@ -40,13 +40,13 @@ cp .env.example .env  # jika .env.example belum ada, gunakan template .env di ba
 php artisan key:generate
 ````
 
----
+
 
 ## Template `.env`
 
 > Salin ke berkas `.env` lalu sesuaikan nilainya.
 
-```dotenv
+
 APP_NAME=MyAbsen
 APP_ENV=local
 APP_KEY=base64:GENERATE_WITH_ARTISAN
@@ -95,13 +95,12 @@ Pilih salah satu:
 
 **A. Migrate & Seed (direkomendasikan untuk dev)**
 
-```bash
+
 php artisan migrate:fresh --seed
 ```
 
 **B. Import SQL (jika tersedia `absensi.sql`)**
 
-```bash
 mysql -u root -p absensi < absensi.sql
 ```
 
@@ -109,14 +108,12 @@ mysql -u root -p absensi < absensi.sql
 
 ## Menjalankan Aplikasi
 
-```bash
 php artisan storage:link   # jika perlu akses storage publik
 php artisan serve          # http://127.0.0.1:8000
 ```
 
 *(Opsional — asset frontend)*
 
-```bash
 npm install
 npm run dev   # atau npm run build
 ```
@@ -127,7 +124,6 @@ npm run dev   # atau npm run build
 
 Jika repositori berisi folder `screenshot menu/`, sematkan contoh:
 
-```md
 ![Dashboard](screenshot%20menu/2%20Dashboard%20Admin.png)
 ![List Absensi](screenshot%20menu/3%20List%20Absensi%20Karyawan.png)
 ![Daftar Cuti](screenshot%20menu/11%20Daftar%20Cuti%20Karyawan.png)
