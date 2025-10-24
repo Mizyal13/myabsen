@@ -1,144 +1,171 @@
-# Sistem-Manajemen-Absensi-Karyawan
+````markdown
+# MyAbsen — Employee Attendance Management (Laravel 12)
 
-Oleh : Muhammad Firyanul Rizky, email : firyan2903@gmail.com, no. hp : 0895606181117
+Aplikasi **manajemen absensi karyawan** berbasis **Laravel 12 (PHP 8.x)** untuk **check-in/check-out**, **pengajuan izin (sakit/cuti) dengan approval**, dan **laporan per karyawan**.
 
-Dibuat menggunakan Framework Laravel 12 dan PHP 8.4.5
+---
 
-Ketentuan demo aplikasi :
-1. instalasi database pada file env dengan nama database: absensi
-2. diberikan 3 pilihan untuk fill data pada database :
-   - dengan seeder : jalankan php artisan migrate:fresh --seed
-   - import data absensi.sql yang sudah disediakan
-   - dengan eloquent orm
-3. masuk sesi admin
-   - email firyan2903@gmail.com dan password : 123
-   - email admin@gmail.com dan password : pw111018
-4. masuk sesi karyawan
-   - email anul29@mail.com dan password :123456
-   - email (sesuai data seeder : Perawat s/d Petugas Kebersihan) => password (semua akun sama) : petugas123
+## Fitur
+- **Absensi**: check-in / check-out, aturan telat/tepat waktu (konfigurable).
+- **Izin**: pengajuan sakit/cuti + **approval** admin/atasan.
+- **Laporan**: rekap per karyawan dengan filter.
+- **Role**: minimal **Admin** & **Karyawan**.
+- **Storage**: dukungan unggah/akses berkas via Laravel storage.
 
-Update Aplikasi :
-1. Fitur Register Admin terdapat pada awal sesi sebelum login
-2. Sedangkan Fitur Register Karyawan terdapat dalam sesi Admin setelah login
+---
 
-NOTE : Penambahan admin selain melalui menu register bisa dilakukan juga menggunakan eloquent orm, untuk petunjuk bisa lihat screenshot paling bawah. Sedangkan Untuk karyawan bisa dilakukan pada fitur tambah karyawan pada sesi admin atau bisa juga memakai eloquent orm dengan ketentuan :
-1. lakukan perintah php artisan tinker, lalu buat variabel baru $emp = new App\Employee
-2. selanjutnya ikuti petunjuk pada screenshot paling bawah untuk menambahkan elemen 'user_id', 'first_name', 'last_name', 'sex', 'dob', 'join_date', 'desg', 'department_id', 'salary', 'photo'
+## Tech Stack
+- **Framework**: Laravel 12, PHP 8.x
+- **Database**: MySQL / MariaDB
+- **Views**: Blade
+- **Tooling**: Composer (wajib), Node.js/NPM *(opsional, untuk build asset)*
 
-# Berikut adalah ketentuan yang sudah terpenuhi :
-# 1. Menggambarkan flow diagram / usecase diagram sederhana yang menggambarkan fitur sistem
-![Catatan 2  Use Case Diagram](https://user-images.githubusercontent.com/60762912/145530391-7a20f130-c3ee-456a-93d6-707f64d82a69.png)
+---
 
-# 2. Mengatur Status Absen masuk yang dilakukan karyawan sebelum jam 09.00 pagi, sedangkan absen keluar dilakukan setelah jam 17.00 akan diberikan status tidak valid pada sistem.
+## Prasyarat
+- PHP **8.2+** (ekstensi: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `json`, `xml`, `ctype`, `bcmath`, `curl`)
+- Composer (terbaru)
+- MySQL/MariaDB
+- Node.js & NPM *(opsional)*
+- Web server (Apache/Nginx) **atau** `php artisan serve` saat development
 
-Operasi Logic Controller yang mengatasi permasalahan no. 2
-![15  Logic Controller dalam menampilkan status absensi](https://user-images.githubusercontent.com/60762912/145531107-963526e1-8a92-439d-b72b-dbb530f69888.PNG)
+---
 
-Operasi Logic View yang akan menampilkan masing-masing status absensi berdasarkan ketentuan.
-![16  Logic View dalam menampilkan status absensi](https://user-images.githubusercontent.com/60762912/145531136-103e6c10-2332-4fab-bad2-cc880a9bee5e.PNG)
+## Quick Start
+```bash
+git clone https://github.com/Mizyal13/myabsen.git
+cd myabsen
+composer install
+cp .env.example .env  # jika .env.example belum ada, gunakan template .env di bawah
+php artisan key:generate
+````
 
-Hasil Implementasi masalah no. 2
--- Tampak Absensi Terlambat jika absensi dilakukan jam 09.00 pagi atau lebih, sedangkan sebelum jam 9 akan dinyatakan tepat waktu --
-![9  Tampak Absensi Terlambat](https://user-images.githubusercontent.com/60762912/145530858-5721660f-9d0b-47c0-8328-f0d25a15ba87.PNG)
+---
 
--- Tampak Absensi Tidak Valid jika absensi dilakukan diatas jam 17:00 sampai jam 7 Pagi --
-![10  Tampak Absensi Tidak Valid](https://user-images.githubusercontent.com/60762912/145530876-22eb653d-7fc8-4a30-8cd7-28ba1387aba4.PNG)
+## Template `.env`
 
-# 2. menyediakan fitur pengajuan ketidakhadiran kerja dibagi menjadi 2 yaitu izin sakit dan izin cuti.
+> Salin ke berkas `.env` lalu sesuaikan nilainya.
 
-![11  Daftar Cuti Karyawan](https://user-images.githubusercontent.com/60762912/145538284-7e8ac00d-40d0-45aa-a2e5-84d92603a933.png)
+```dotenv
+APP_NAME=MyAbsen
+APP_ENV=local
+APP_KEY=base64:GENERATE_WITH_ARTISAN
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+APP_TIMEZONE=Asia/Jakarta
+LOG_CHANNEL=stack
+LOG_LEVEL=debug
 
-Ketentuan masalah no. 2 adalah :
+# Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=absensi
+DB_USERNAME=root
+DB_PASSWORD=your_password
 
--- 1. Apabila karyawan sedang sakit, izin sakit bisa diinputkan maksimal H+3 sejak tanggal ketidakhadiran karyawan --
--- 2. Apabila karyawan ingin mengajukan cuti, karyawan dapat menginputkan izin cuti maksimal H-1 dari rencana ketidakhadiran karyawan --
-Dibawah ini adalah operasi logic yang mengatur ketentuan 1 dan 2 untuk izin sakit dan cuti.
+# Cache / Session / Queue
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+QUEUE_CONNECTION=sync
 
-Operasi Logic untuk mengatasi ketentuan pertama dan kedua :
+# Filesystem
+FILESYSTEM_DISK=public
 
-![17  Logic Controller dalam mengatur izin sakit atau cuti](https://user-images.githubusercontent.com/60762912/145531154-57799a09-1bc2-4f01-a110-5ed1d5a474af.PNG)
+# Mail (opsional)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="no-reply@myabsen.local"
+MAIL_FROM_NAME="${APP_NAME}"
 
-Apabila melanggar ketentuan pertama, maka akan tampil alert :
+# Broadcasting (opsional)
+BROADCAST_DRIVER=log
+```
 
-![12  Batasan Pengajuan Maksimum 3 Hari untuk Izin Sakit](https://user-images.githubusercontent.com/60762912/145538814-cfad2d6b-1418-42b0-9467-be5fb1879ef8.png)
+---
 
-Sedangkan, jika melanggar ketentuan kedua, maka akan tampil alert :
+## Setup Database
 
-![13  Batasan Pengajuan Maksimum H-1 untuk Izin Cuti](https://user-images.githubusercontent.com/60762912/145538831-44081a28-bcdd-43ef-ad94-cb44ee28ccbc.png)
+Pilih salah satu:
 
--- 3. Setelah izin cuti diinputkan, manajer/atasan karyawan dalam hal ini user dengan sesi admin harus melakukan approval terhadap izin cuti yang diajukan --
+**A. Migrate & Seed (direkomendasikan untuk dev)**
 
-![3  List Cuti Karyawan](https://user-images.githubusercontent.com/60762912/145530688-110c23b7-7751-40e1-b293-f406fe3b4b7e.PNG)
+```bash
+php artisan migrate:fresh --seed
+```
 
-![4  Ubah Status Cuti Karyawan](https://user-images.githubusercontent.com/60762912/145530702-23781829-3f15-4872-8ffd-b09791109f44.PNG)
+**B. Import SQL (jika tersedia `absensi.sql`)**
 
-# 3. Semua data yang terekam dari semua fitur diatas dapat ditampilkan menjadi sebuah laporan yang berisi ketidakhadiran dan absensi karyawan. 
+```bash
+mysql -u root -p absensi < absensi.sql
+```
 
-Ketentuan Masalah No. 3 adalah : 
+---
 
--- 1. Laporan ditampilkan per karyawan dan hanya dapat dilihat oleh HRD dan manajer/atasan -- 
+## Menjalankan Aplikasi
 
-Mengatasi masalah 1, sistem dibuat dengan 2 user, yakni admin dan karyawan, pada sesi admin user bisa melihat laporan per karyawan :
+```bash
+php artisan storage:link   # jika perlu akses storage publik
+php artisan serve          # http://127.0.0.1:8000
+```
 
-![2  Dashboard Admin](https://user-images.githubusercontent.com/60762912/145530637-608ce856-936c-4307-8df7-a557741b871f.PNG)
+*(Opsional — asset frontend)*
 
-![3  List Absensi Karyawan](https://user-images.githubusercontent.com/60762912/145530667-b3a718ec-ab9c-4540-b541-e229ab49b48e.PNG)
+```bash
+npm install
+npm run dev   # atau npm run build
+```
 
--- 2. karyawan hanya bisa melihat rekaman data dirinya sendiri saja --
-Mengatasi masalah 2, diperlukan sesi user karyawan yang hanya di autorisasi dan diizinkan untuk melihat laporannya sendiri :
+---
 
-![5  Dashboard Karyawan](https://user-images.githubusercontent.com/60762912/145530736-b326175a-0e7b-464a-bda1-cc166d5203bd.PNG)
+## Screenshots
 
-![List Absensi Karyawan](https://user-images.githubusercontent.com/60762912/145540622-19727929-ea04-428d-bf06-5d6d25bc97aa.PNG)
+Jika repositori berisi folder `screenshot menu/`, sematkan contoh:
 
-# 4. Absen masuk dan keluar menggunakan geo-tagging dari tempat tertentu.
-Berikut 2 dibawah adalah implementasinya, sistem sudah bisa menginputkan wilayah berdasarkan geo tagging lokasi.
+```md
+![Dashboard](screenshot%20menu/2%20Dashboard%20Admin.png)
+![List Absensi](screenshot%20menu/3%20List%20Absensi%20Karyawan.png)
+![Daftar Cuti](screenshot%20menu/11%20Daftar%20Cuti%20Karyawan.png)
+```
 
-Geo Tagging Untuk absen masuk :
+---
 
-![7  Absen Masuk Karyawan](https://user-images.githubusercontent.com/60762912/145530825-1cef1e14-fb4b-4351-9d8e-1af48ba33e03.PNG)
+## Troubleshooting
 
-Geo Tagging Untuk absen keluar :
+* **HTTP 500 / Blank Page**: periksa `storage/logs/laravel.log`, versi PHP & ekstensi, pastikan `composer install` sukses.
+* **Gagal Koneksi DB**: cek kredensial `.env`, pastikan DB ada; uji `mysql -u <user> -p`.
+* **Asset tidak muncul**: jika pakai Mix/Vite, jalankan `npm run dev` dan cek path hasil build.
+* **Gambar/Berkas hilang**: pastikan `php artisan storage:link` dan permission `storage`/`public`.
 
-![8  Absen Keluar Karyawan](https://user-images.githubusercontent.com/60762912/145530842-aa1a05a3-c7fe-4b41-a582-01024cdf2ef2.PNG)
+---
 
-# 4. Menggunakan Eloquent ORM Laravel dalam melakukan interaksi database.
-Berikut adalah implementasinya :
-![14  Interaksi Database dengan Eloquent ORM Laravel](https://user-images.githubusercontent.com/60762912/145530517-386bf347-741b-4940-909c-ee07fcd59f30.PNG)
+## Kontribusi
 
-# 5. Menu Setting Lembur oleh Admin.
-Admin bisa mengatur parameter hitung dari penentuan lembur tiap Department seperti jam awal/batas akhir dan upah lembur per jam nya melalui menu setting
-![Screenshot 2024-11-27 180854](https://github.com/user-attachments/assets/d0b013b8-6d20-4254-a45b-c3037270363b)
+1. Fork repo
+2. `git checkout -b feat/nama-fitur`
+3. `git commit -m "feat: tambah fitur X"`
+4. `git push origin feat/nama-fitur`
+5. Buka Pull Request
 
-# 6. Pengajuan Lembur oleh Karyawan.
-Karyawan dapat mengajukan hak jam lemburnya
+---
 
-![Screenshot 2024-11-27 180424](https://github.com/user-attachments/assets/9681f8b8-957e-4e49-a8cd-0e2785699500)
+## Lisensi
 
-dimana logika perhitungan lembur ditentukan sebagai berikut :
+TBD (mis. **MIT** atau **All rights reserved**).
 
-- Karyawan Melakukan Absen Keluar sesuai Range Lembur dan Jam harus menunjukkan lewat 1 Jam dari parameter setting awal lembur oleh admin, seperti contoh disini jam selesai menunjukkan pukul 21:11
+---
 
-![Screenshot 2024-11-27 180323](https://github.com/user-attachments/assets/c304b025-dc4f-4809-8fc9-d764b457d53d)
+## Pengembang
 
-- Jumlah Jam Lembur = Selisih Jam Absen Keluar dengan parameter setting awal lembur oleh admin 
-  (contoh : pukul 21:11 (dibulatkan 21:00) - pukul 17:00 = 4 Jam)
-- Jumlah Upah Lembur = Perkalian Jumlah Jam Lembur dengan parameter setting upah lembur per jam oleh admin
-  (contoh : Rp. 10.000,- x 4 Jam = Rp. 40.000,-)
+**Mizyal Jillauzi** — Jakarta Selatan
+GitHub: [https://github.com/Mizyal13](https://github.com/Mizyal13)
 
-Berikut adalah Operasi Logic Controller yang mengatur perhitungan gaji karyawan :
+```
 
-![Screenshot 2024-11-27 181539](https://github.com/user-attachments/assets/bac374ae-2eec-4d36-a717-b6baa1f03d1e)
-
-# 7. Slip Gaji Karyawan.
-Pada Sesi Karyawan terdapat menu Slip Gaji 1 Bulan Terakhir
-
-![Screenshot 2024-11-28 045244](https://github.com/user-attachments/assets/637a0a7a-be74-49ad-a596-e27561597637)
-
-Jika di tekan tombol Print maka akan mencetak dokumen pdf Slip Gaji
-
-![Screenshot 2024-11-28 045320](https://github.com/user-attachments/assets/1178e24e-9dd8-4535-82c5-121d11528c9e)
-
-Berikut adalah logika menampilkan Slip Gaji 1 bulan terakhir :
-
-![Screenshot 2024-11-28 045512](https://github.com/user-attachments/assets/7884e74c-46d7-4658-8854-f30b25dda37e)
+::contentReference[oaicite:0]{index=0}
+```
