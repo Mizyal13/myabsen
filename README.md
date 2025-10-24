@@ -38,11 +38,10 @@ cd myabsen
 composer install
 cp .env.example .env  # jika .env.example belum ada, gunakan template .env di bawah
 php artisan key:generate
-````
 
 
 
-## Template `.env`
+
 
 > Salin ke berkas `.env` lalu sesuaikan nilainya.
 
@@ -85,9 +84,7 @@ MAIL_FROM_NAME="${APP_NAME}"
 
 # Broadcasting (opsional)
 BROADCAST_DRIVER=log
-```
 
----
 
 ## Setup Database
 
@@ -97,12 +94,12 @@ Pilih salah satu:
 
 
 php artisan migrate:fresh --seed
-```
+
 
 **B. Import SQL (jika tersedia `absensi.sql`)**
 
 mysql -u root -p absensi < absensi.sql
-```
+
 
 ---
 
@@ -110,24 +107,14 @@ mysql -u root -p absensi < absensi.sql
 
 php artisan storage:link   # jika perlu akses storage publik
 php artisan serve          # http://127.0.0.1:8000
-```
+
 
 *(Opsional — asset frontend)*
 
 npm install
 npm run dev   # atau npm run build
-```
 
----
 
-## Screenshots
-
-Jika repositori berisi folder `screenshot menu/`, sematkan contoh:
-
-![Dashboard](screenshot%20menu/2%20Dashboard%20Admin.png)
-![List Absensi](screenshot%20menu/3%20List%20Absensi%20Karyawan.png)
-![Daftar Cuti](screenshot%20menu/11%20Daftar%20Cuti%20Karyawan.png)
-```
 
 ---
 
